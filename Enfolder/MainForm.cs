@@ -10,13 +10,20 @@ namespace Enfolder
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Drawing;
+    using System.IO;
     using System.Windows.Forms;
+    using Microsoft.Win32;
 
     /// <summary>
     /// Description of MainForm.
     /// </summary>
     public partial class MainForm : Form
     {
+        /// <summary>
+        /// The enfolder key list.
+        /// </summary>
+        private List<string> enfolderKeyList = new List<string> { @"Software\Classes\*\shell\Enfolder", @"Software\Classes\directory\shell\Enfolder" };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Enfolder.MainForm"/> class event.
         /// </summary>
@@ -33,7 +40,66 @@ namespace Enfolder
         /// <param name="e">Event arguments.</param>
         private void OnAddButtonClick(object sender, EventArgs e)
         {
-            // TODO Add code
+            try
+            {
+                // Iterate enfolder registry keys 
+                foreach (var enfolderKey in this.enfolderKeyList)
+                {
+                    // Add enfolder command to registry
+                    RegistryKey registryKey;
+                    registryKey = Registry.CurrentUser.CreateSubKey(enfolderKey);
+                    registryKey.SetValue("icon", Application.ExecutablePath);
+                    registryKey.SetValue("position", "Top");
+                    registryKey = Registry.CurrentUser.CreateSubKey($"{enfolderKey}\\command");
+                    registryKey.SetValue(string.Empty, $"{Path.Combine(Application.StartupPath, Application.ExecutablePath)} \"%1\"");
+                    registryKey.Close();
+                }
+
+                // Update the program by registry key
+                this.UpdateByRegistryKey();
+
+                // Notify user
+                MessageBox.Show($"Enfolder context menu added!{Environment.NewLine}{Environment.NewLine}Right-click in Windows Explorer to use it.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                // Notify user
+                MessageBox.Show($"Error when adding flatten context menu to registry.{Environment.NewLine}{Environment.NewLine}Message:{Environment.NewLine}{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Updates the program by registry key.
+        /// </summary>
+        private void UpdateByRegistryKey()
+        {
+            // Try to set flatten key
+            using (var flattenKey = Registry.CurrentUser.OpenSubKey(this.enfolderKeyList[0]))
+            {
+                // Check for no returned registry key
+                if (flattenKey == null)
+                {
+                    // Disable remove button
+                    this.removeButton.Enabled = false;
+
+                    // Enable add button
+                    this.addButton.Enabled = true;
+
+                    // Update status text
+                    this.activityToolStripStatusLabel.Text = "Inactive";
+                }
+                else
+                {
+                    // Disable add button
+                    this.addButton.Enabled = false;
+
+                    // Enable remove button
+                    this.removeButton.Enabled = true;
+
+                    // Update status text
+                    this.activityToolStripStatusLabel.Text = "Active";
+                }
+            }
         }
 
         /// <summary>
