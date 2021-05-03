@@ -31,6 +31,12 @@ namespace Enfolder
         {
             // The InitializeComponent() call is required for Windows Forms designer support.
             this.InitializeComponent();
+
+            //#
+            foreach (var item in Environment.GetCommandLineArgs())
+            {
+                MessageBox.Show(item);
+            }
         }
 
         /// <summary>
@@ -64,7 +70,7 @@ namespace Enfolder
             catch (Exception ex)
             {
                 // Notify user
-                MessageBox.Show($"Error when adding flatten context menu to registry.{Environment.NewLine}{Environment.NewLine}Message:{Environment.NewLine}{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error when adding enfolder context menu to registry.{Environment.NewLine}{Environment.NewLine}Message:{Environment.NewLine}{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -73,7 +79,7 @@ namespace Enfolder
         /// </summary>
         private void UpdateByRegistryKey()
         {
-            // Try to set flatten key
+            // Try to set enfolder key
             using (var flattenKey = Registry.CurrentUser.OpenSubKey(this.enfolderKeyList[0]))
             {
                 // Check for no returned registry key
@@ -109,7 +115,26 @@ namespace Enfolder
         /// <param name="e">Event arguments.</param>
         private void OnRemoveButtonClick(object sender, EventArgs e)
         {
-            // TODO Add code
+            try
+            {
+                // Iterate enfolder registry keys 
+                foreach (var enfolderKey in this.enfolderKeyList)
+                {
+                    // Remove enfolder command to registry
+                    Registry.CurrentUser.DeleteSubKeyTree(enfolderKey);
+                }
+
+                // Update the program by registry key
+                this.UpdateByRegistryKey();
+
+                // Notify user
+                MessageBox.Show("Enfolder context menu removed.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                // Notify user
+                MessageBox.Show($"Error when removing enfolder command from registry.{Environment.NewLine}{Environment.NewLine}Message:{Environment.NewLine}{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         /// <summary>
