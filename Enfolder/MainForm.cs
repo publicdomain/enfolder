@@ -31,12 +31,6 @@ namespace Enfolder
         {
             // The InitializeComponent() call is required for Windows Forms designer support.
             this.InitializeComponent();
-
-            //#
-            foreach (var item in Environment.GetCommandLineArgs())
-            {
-                MessageBox.Show(item);
-            }
         }
 
         /// <summary>
