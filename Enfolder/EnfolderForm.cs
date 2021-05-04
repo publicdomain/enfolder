@@ -38,12 +38,16 @@ namespace Enfolder
         }
 
         /// <summary>
-        /// Adds the item.
+        /// Ons the item added.
         /// </summary>
-        /// <param name="newItem">New item.</param>
-        public void AddItem(string newItem)
+        /// <param name="sender">Sender.</param>
+        /// <param name="args">Arguments.</param>
+        public void OnItemAdded(object sender, EnfolderDataEventArgs args)
         {
-            // TODO Add code
+            foreach (var item in args.Items)
+            {
+                this.itemListBox.Items.Add(item);
+            }
         }
     }
 }

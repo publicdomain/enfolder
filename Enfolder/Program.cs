@@ -15,6 +15,7 @@ namespace Enfolder
     using System.Windows.Forms;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.IO.MemoryMappedFiles;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Class with program entry point.
@@ -78,7 +79,14 @@ namespace Enfolder
                     // Launch 
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
-                    Application.Run(new EnfolderForm());
+
+                    using (var enfolderForm = new EnfolderForm())
+
+                    {
+                        EnfolderData.OnItemAdded += enfolderForm.OnItemAdded;
+
+                        Application.Run(enfolderForm);
+                    }
                 }
                 finally
                 {
@@ -122,7 +130,7 @@ namespace Enfolder
             // Re-set the named pipe server
             namedPipeServerStream = new NamedPipeServerStream("EnfolderIPC", PipeDirection.InOut, 1, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
 
-            // Prepare for connection
+            // Prepare for connection again
             namedPipeServerStream.BeginWaitForConnection(new AsyncCallback(ConnectionHandler), namedPipeServerStream);
         }
 
@@ -132,7 +140,8 @@ namespace Enfolder
         /// <param name="args">Arguments.</param>
         static void ProcessArguments(string[] args)
         {
-            // TODO Add code
+
+            EnfolderData.AddItems(new List<string>(args));
         }
 
     }
