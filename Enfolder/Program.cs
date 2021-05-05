@@ -16,6 +16,8 @@ namespace Enfolder
     using System.Runtime.Serialization.Formatters.Binary;
     using System.IO.MemoryMappedFiles;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using System.Linq;
 
     /// <summary>
     /// Class with program entry point.
@@ -26,6 +28,11 @@ namespace Enfolder
         /// The mutex.
         /// </summary>
         private static Mutex mutex = null;
+
+        /// <summary>
+        /// The file path.
+        /// </summary>
+        private static string filePath = "EnfolderItems.txt";
 
         /// <summary>
         /// Program entry point.
@@ -39,110 +46,54 @@ namespace Enfolder
                 // The first instance flag
                 bool firstInstance;
 
+                // Set items
+                var items = new List<string>(args).GetRange(1, args.Length - 1);
+
                 // Set mutext
                 mutex = new Mutex(true, @"Local\Enfolder", out firstInstance);
 
-                // Check for a secondary instance
-                if (!firstInstance)
+                // Set written flag
+                bool written = false;
+
+                // Append to item file
+                while (!written)
                 {
-                    // Set the named pipe client
-                    NamedPipeClientStream namedPipeClientStream = new NamedPipeClientStream(".", "EnfolderIPC", PipeDirection.InOut);
-
-                    // Connect named pipe client
-                    namedPipeClientStream.Connect();
-
-                    // Set binary formatter
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-
-                    // Process/serialize current arguments
-                    binaryFormatter.Serialize(namedPipeClientStream, args);
-
-                    // Close the named pipe client
-                    namedPipeClientStream.Close();
-
-                    // Halt flow
-                    return;
-                }
-
-                // First instance. Run 
-                try
-                {
-                    // Process current arguments
-                    ProcessArguments(args);
-
-                    // Set the named pipe server
-                    NamedPipeServerStream namedPipeServerStream = new NamedPipeServerStream("EnfolderIPC", PipeDirection.InOut, 1, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
-
-                    // Prepare server for connections
-                    namedPipeServerStream.BeginWaitForConnection(new AsyncCallback(ConnectionHandler), namedPipeServerStream);
-
-                    // Launch 
-                    Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(false);
-
-                    using (var enfolderForm = new EnfolderForm())
-
+                    try
                     {
-                        EnfolderData.OnItemAdded += enfolderForm.OnItemAdded;
-
-                        Application.Run(enfolderForm);
+                        // Append items
+                        File.AppendAllLines(filePath, items);
+                    }
+                    catch
+                    {
+                        Thread.Sleep(20);
                     }
                 }
-                finally
+
+                // Check for first instance
+                if (firstInstance)
                 {
-                    // Release the mutex
-                    mutex.ReleaseMutex();
+                    // First instance
+                    try
+                    {
+                        // Launch enfolder form
+                        Application.EnableVisualStyles();
+                        Application.SetCompatibleTextRenderingDefault(false);
+                        Application.Run(new EnfolderForm());
+                    }
+                    finally
+                    {
+                        // Release the mutex
+                        mutex.ReleaseMutex();
+                    }
                 }
             }
             else // By user
             {
-                // Run it
+                // Run main form
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new MainForm());
             }
         }
-
-        /// <summary>
-        /// Connections the handler.
-        /// </summary>
-        /// <param name="result">Result.</param>
-        static void ConnectionHandler(IAsyncResult result)
-        {
-            // Set named pipe server
-            NamedPipeServerStream namedPipeServerStream = result.AsyncState as NamedPipeServerStream;
-
-            // Wait for connection
-            namedPipeServerStream.EndWaitForConnection(result);
-
-            // Set binary formatter
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-
-            // Set the arguments
-            string[] arguments = binaryFormatter.Deserialize(namedPipeServerStream) as string[];
-
-            // Process the arguments
-            ProcessArguments(arguments);
-
-            // Close the server
-            namedPipeServerStream.Close();
-
-            // Re-set the named pipe server
-            namedPipeServerStream = new NamedPipeServerStream("EnfolderIPC", PipeDirection.InOut, 1, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
-
-            // Prepare for connection again
-            namedPipeServerStream.BeginWaitForConnection(new AsyncCallback(ConnectionHandler), namedPipeServerStream);
-        }
-
-        /// <summary>
-        /// Processes the arguments.
-        /// </summary>
-        /// <param name="args">Arguments.</param>
-        static void ProcessArguments(string[] args)
-        {
-
-            EnfolderData.AddItems(new List<string>(args));
-        }
-
     }
 }
