@@ -32,7 +32,8 @@ namespace Enfolder
         /// </summary>
         public EnfolderForm(string filePath)
         {
-            InitializeComponent();
+            // The InitializeComponent() call is required for Windows Forms designer support.
+            this.InitializeComponent();
 
             // Set file path
             this.filePath = filePath;
@@ -65,7 +66,11 @@ namespace Enfolder
         /// <param name="e">Event arguments.</param>
         private void OnEnfolderFormFormClosing(object sender, FormClosingEventArgs e)
         {
-            // TODO Add code
+            // Get file write mutex to remove frmo disk
+            Mutex fileMutex = new Mutex(false, @"Local\EnfolderFile");
+            fileMutex.WaitOne();
+            File.Delete(this.filePath); // Remove it
+            fileMutex.ReleaseMutex();
         }
 
         /// <summary>

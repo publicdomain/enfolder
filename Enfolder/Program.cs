@@ -49,7 +49,7 @@ namespace Enfolder
             // Check arguments for context menu start
             if (args.Length > 0)
             {
-                // Ge file write mutex to write item
+                // Get file write mutex to write item
                 FileMutex = new Mutex(false, @"Local\EnfolderFile");
                 FileMutex.WaitOne();
                 File.AppendAllLines(filePath, args);
