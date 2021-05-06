@@ -74,10 +74,10 @@ namespace Enfolder
         private void UpdateByRegistryKey()
         {
             // Try to set enfolder key
-            using (var flattenKey = Registry.CurrentUser.OpenSubKey(this.enfolderKeyList[0]))
+            using (var enfolderKey = Registry.CurrentUser.OpenSubKey(this.enfolderKeyList[1]))
             {
                 // Check for no returned registry key
-                if (flattenKey == null)
+                if (enfolderKey == null)
                 {
                     // Disable remove button
                     this.removeButton.Enabled = false;

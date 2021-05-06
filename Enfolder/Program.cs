@@ -18,6 +18,7 @@ namespace Enfolder
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using System.Linq;
+    using System.Text;
 
     /// <summary>
     /// Class with program entry point.
@@ -25,9 +26,14 @@ namespace Enfolder
     internal sealed class Program
     {
         /// <summary>
-        /// The mutex.
+        /// The first instance mutex.
         /// </summary>
-        private static Mutex mutex = null;
+        public static Mutex FirstInstanceMutex = null;
+
+        /// <summary>
+        /// The file mutex.
+        /// </summary>
+        public static Mutex FileMutex = null;
 
         /// <summary>
         /// The file path.
@@ -43,48 +49,29 @@ namespace Enfolder
             // Check arguments for context menu start
             if (args.Length > 0)
             {
+                // Ge file write mutex to write item
+                FileMutex = new Mutex(false, @"Local\EnfolderFile");
+                FileMutex.WaitOne();
+                File.AppendAllLines(filePath, args);
+                FileMutex.ReleaseMutex();
+
                 // The first instance flag
                 bool firstInstance;
 
-                // Set items
-                var items = new List<string>(args).GetRange(1, args.Length - 1);
+                // Set first instance mutex
+                FirstInstanceMutex = new Mutex(true, @"Local\EnfolderFirsInstance", out firstInstance);
 
-                // Set mutext
-                mutex = new Mutex(true, @"Local\Enfolder", out firstInstance);
-
-                // Set written flag
-                bool written = false;
-
-                // Append to item file
-                while (!written)
-                {
-                    try
-                    {
-                        // Append items
-                        File.AppendAllLines(filePath, items);
-                    }
-                    catch
-                    {
-                        Thread.Sleep(20);
-                    }
-                }
-
+                // Act according to instance
                 // Check for first instance
                 if (firstInstance)
                 {
-                    // First instance
-                    try
-                    {
-                        // Launch enfolder form
-                        Application.EnableVisualStyles();
-                        Application.SetCompatibleTextRenderingDefault(false);
-                        Application.Run(new EnfolderForm());
-                    }
-                    finally
-                    {
-                        // Release the mutex
-                        mutex.ReleaseMutex();
-                    }
+                    // Launch enfolder form
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new EnfolderForm(filePath));
+
+                    // Release the mutex
+                    FirstInstanceMutex.ReleaseMutex();
                 }
             }
             else // By user
@@ -95,5 +82,6 @@ namespace Enfolder
                 Application.Run(new MainForm());
             }
         }
+
     }
 }
