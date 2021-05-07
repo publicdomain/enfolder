@@ -58,66 +58,8 @@ namespace Enfolder
         /// <param name="e">Event arguments.</param>
         private void OnSubfolderButtonClick(object sender, EventArgs e)
         {
-            // Done flag
-            bool done = false;
-
-            // Naming loop
-            while (true)
-            {
-                // Declare destination directory
-                string destinationDirectory = string.Empty;
-
-                // Get directory name
-                string directoryName = Interaction.InputBox("Please enter subfolder name to create:", "Subfolder", $"Enfolder_{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}");
-
-                // Check there's something
-                if (directoryName.Length > 0)
-                {
-                    // Set destination directory
-                    destinationDirectory = Path.Combine(Environment.CurrentDirectory, directoryName);
-
-                    // Check it is new
-                    if (Directory.Exists(destinationDirectory))
-                    {
-                        // Ask user to enter new directory name
-                        if (MessageBox.Show("Directory already exists. Would you like to retry?", "Existing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-                        {
-                            // Try again. Trigger another while iteration
-                            continue;
-                        }
-                        else
-                        {
-                            // User said no. Halt flow
-                            return;
-                        }
-                    }
-
-                    // Enfolder
-                    this.Enfolder(destinationDirectory);
-
-                    // Toggle done flag
-                    done = true;
-
-                    // Exit while
-                    break;
-                }
-                else
-                {
-                    // Halt flow
-                    return;
-                }
-            }
-
-            // Check if done
-            if (done)
-            {
-                // Disable buttons
-                this.subfolderButton.Enabled = false;
-                this.browseButton.Enabled = false;
-
-                // Exit program
-                Application.Exit();
-            }
+            // Trigger subfolder
+            this.Subfolder(Environment.CurrentDirectory);
         }
 
         /// <summary>
@@ -235,6 +177,74 @@ namespace Enfolder
 
             // Re-enable timer
             this.itemTimer.Start();
+        }
+
+        /// <summary>
+        /// Subfolder the specified baseDirectory.
+        /// </summary>
+        /// <param name="baseDirectory">Base directory.</param>
+        private void Subfolder(string baseDirectory)
+        {
+            // Done flag
+            bool done = false;
+
+            // Naming loop
+            while (true)
+            {
+                // Declare destination directory
+                string destinationDirectory = string.Empty;
+
+                // Get directory name
+                string directoryName = Interaction.InputBox("Please enter subfolder name to create:", "Subfolder", $"Enfolder_{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}");
+
+                // Check there's something
+                if (directoryName.Length > 0)
+                {
+                    // Set destination directory
+                    destinationDirectory = Path.Combine(baseDirectory, directoryName);
+
+                    // Check it is new
+                    if (Directory.Exists(destinationDirectory))
+                    {
+                        // Ask user to enter new directory name
+                        if (MessageBox.Show("Directory already exists. Would you like to retry?", "Existing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                        {
+                            // Try again. Trigger another while iteration
+                            continue;
+                        }
+                        else
+                        {
+                            // User said no. Halt flow
+                            return;
+                        }
+                    }
+
+                    // Enfolder
+                    this.Enfolder(destinationDirectory);
+
+                    // Toggle done flag
+                    done = true;
+
+                    // Exit while
+                    break;
+                }
+                else
+                {
+                    // Halt flow
+                    return;
+                }
+            }
+
+            // Check if done
+            if (done)
+            {
+                // Disable buttons
+                this.subfolderButton.Enabled = false;
+                this.browseButton.Enabled = false;
+
+                // Exit program
+                Application.Exit();
+            }
         }
 
         /// <summary>
