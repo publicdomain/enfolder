@@ -44,6 +44,7 @@
         	this.itemListBox = new System.Windows.Forms.ListBox();
         	this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
         	this.itemTimer = new System.Windows.Forms.Timer(this.components);
+        	this.enfolderToolStripProgressBar = new System.Windows.Forms.ToolStripProgressBar();
         	this.statusStrip.SuspendLayout();
         	this.tableLayoutPanel1.SuspendLayout();
         	this.SuspendLayout();
@@ -54,7 +55,8 @@
         	        	        	this.fileToolStripStatusLabel,
         	        	        	this.fileCountToolStripStatusLabel,
         	        	        	this.directoryToolStripStatusLabel,
-        	        	        	this.directoryCountToolStripStatusLabel});
+        	        	        	this.directoryCountToolStripStatusLabel,
+        	        	        	this.enfolderToolStripProgressBar});
         	this.statusStrip.Location = new System.Drawing.Point(0, 240);
         	this.statusStrip.Name = "statusStrip";
         	this.statusStrip.Size = new System.Drawing.Size(290, 22);
@@ -162,6 +164,12 @@
         	this.itemTimer.Enabled = true;
         	this.itemTimer.Tick += new System.EventHandler(this.OnItemTimerTick);
         	// 
+        	// enfolderToolStripProgressBar
+        	// 
+        	this.enfolderToolStripProgressBar.Name = "enfolderToolStripProgressBar";
+        	this.enfolderToolStripProgressBar.Size = new System.Drawing.Size(100, 16);
+        	this.enfolderToolStripProgressBar.Visible = false;
+        	// 
         	// EnfolderForm
         	// 
         	this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -180,6 +188,7 @@
         	this.ResumeLayout(false);
         	this.PerformLayout();
         }
+        private System.Windows.Forms.ToolStripProgressBar enfolderToolStripProgressBar;
         private System.Windows.Forms.Timer itemTimer;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
         private System.Windows.Forms.ListBox itemListBox;
