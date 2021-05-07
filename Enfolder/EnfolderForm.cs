@@ -69,7 +69,15 @@ namespace Enfolder
         /// <param name="e">Event arguments.</param>
         private void OnBrowseButtonClick(object sender, EventArgs e)
         {
-            // TODO Add code
+            // Set folder browser dialog result by showing
+            DialogResult folderBrowserDialogResultdialog = this.folderBrowserDialog.ShowDialog();
+
+            // Check there's something
+            if (folderBrowserDialogResultdialog == DialogResult.OK && !string.IsNullOrWhiteSpace(this.folderBrowserDialog.SelectedPath))
+            {
+                // Trigger subfolder
+                this.Subfolder(this.folderBrowserDialog.SelectedPath);
+            }
         }
 
         /// <summary>
