@@ -273,11 +273,27 @@ namespace Enfolder
             // Processed items
             int processedItems = 0;
 
+            // Declare error list
+            List<string> errorList = new List<string>();
+
             // Process directories
             foreach (var directory in this.directoryList)
             {
-                // Move to passed destination directory
-                Directory.Move(directory, Path.Combine(destinationDirectory, new DirectoryInfo(directory).Name));
+                // Set destination path
+                string destinationPath = Path.Combine(destinationDirectory, new DirectoryInfo(directory).Name);
+
+                try
+                {
+                    // Move to passed destination directory
+                    Directory.Move(directory, destinationPath);
+                }
+                catch (Exception exception)
+                {
+                    // Add exception to error list
+                    errorList.Add(
+                    $"From: {directory}{Environment.NewLine}To: {destinationPath}{Environment.NewLine}Message: {exception.Message}{Environment.NewLine}{Environment.NewLine}"
+                        );
+                }
 
                 // Raise processed items
                 processedItems++;
@@ -289,14 +305,37 @@ namespace Enfolder
             // Process files
             foreach (var file in this.fileList)
             {
-                // Move to passed destination directory
-                File.Move(file, Path.Combine(destinationDirectory, Path.GetFileName(file)));
+                // Set destination path
+                string destinationPath = Path.Combine(destinationDirectory, Path.GetFileName(file));
+
+                try
+                {
+                    // Move to passed destination directory
+                    File.Move(file, destinationPath);
+                }
+                catch (Exception exception)
+                {
+                    // Add exception to error list
+                    errorList.Add(
+                    $"From: {file}{Environment.NewLine}To: {destinationPath}{Environment.NewLine}Message: {exception.Message}{Environment.NewLine}{Environment.NewLine}"
+                        );
+                }
 
                 // Raise processed items
                 processedItems++;
 
                 // Update progress bar
                 this.enfolderToolStripProgressBar.Value = ((processedItems / itemCount) * 100);
+            }
+
+            // Handle error list
+            if (errorList.Count > 0)
+            {
+                // Save to file
+                File.AppendAllLines("EnfolderErrorLog.txt", errorList);
+
+                // Advise user
+                MessageBox.Show($"Error count: {errorList.Count} error{(errorList.Count > 1 ? "s" : string.Empty)}.{Environment.NewLine}{Environment.NewLine}Please check EnfolderErrorLog.txt for detailed information.", "Enfolder operation had errors", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
