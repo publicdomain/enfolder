@@ -31,6 +31,9 @@ namespace Enfolder
         {
             // The InitializeComponent() call is required for Windows Forms designer support.
             this.InitializeComponent();
+
+            // Update GUI
+            this.UpdateByRegistryKey();
         }
 
         /// <summary>
